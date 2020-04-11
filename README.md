@@ -82,4 +82,9 @@ And then navigate to the URL provided in the terminal (usually
 
 This project uses zero-runtime bindings to [Benchmark.js](https://benchmarkjs.com/).
 You can see them in [BenchmarkJs.re](src/BenchmarkJs.re). Feel free to use them
-for your own projects.
+for your own projects. They are *not* the complete Benchmark.js API (yet).
+
+## Contributions
+
+Contributions are welcome. If you have a really cool benchmark suite that you
+think should be included on the site, feel free to open a pull request.
