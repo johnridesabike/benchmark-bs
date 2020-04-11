@@ -29,6 +29,10 @@ module ArrayAccess = {
 };
 ```
 
+Be aware that BuckleScript does aggresive optimizations, so check the compiled
+JavaScript to ensure that your benchmark functions are actually doing what you
+expect. Sometimes BuckleScript will remove "no-op" code.
+
 Namespacing your benchmark with a module isn't necessary, but helps keep it
 organized.
 
@@ -42,31 +46,34 @@ module Routes = {
     url: string,
   };
   type key =
-    | Strings
-    | ListArray
-    | MapsGet
-    | MapsSet
     | ArrayAccess; /* <- Add a variant here to identify it. */
 
   let map =
     fun
-    | Strings => {suite: Strings.suite, url: "concat-strings"}
-    | ListArray => {suite: ListArray.suite, url: "list-array"}
-    | MapsGet => {suite: Maps.getting, url: "maps-get"}
-    | MapsSet => {suite: Maps.setting, url: "maps-set"}
     /* Add the suite and the url here. */
     | ArrayAccess => {suite: ArrayAccess.suite, url: "array-access"};
 
   let fromUrl =
     fun
-    | "concat-strings" => Some(Strings)
-    | "list-array" => Some(ListArray)
-    | "maps-get" => Some(MapsGet)
-    | "maps-set" => Some(MapsSet)
     | "array-access" => Some(ArrayAccess) /* <- Add the same url here. */
     | _ => None;
 
   /* Add it to this array to be listed on the main menu. */
-  let routes = [|Strings, ListArray, MapsGet, MapsSet, ArrayAccess|];
+  let routes = [|ArrayAccess|];
 };
 ```
+
+Build the project.
+
+```sh
+npm run build:re
+```
+
+And load the development server.
+
+```sh
+npm run dev
+```
+
+And then navigate to the URL provided in the terminal (usually
+`localhost:1234`). Click on your benchmark and press "run."

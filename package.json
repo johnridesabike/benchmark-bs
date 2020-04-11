@@ -9,7 +9,7 @@
     "build:re": "bsb -make-world",
     "clean:re": "bsb -clean-world",
     "dev": "parcel src/index.html",
-    "build": "npm run build:reason && parcel build src/index.html --public-url ./",
+    "build": "npm run build:re && parcel build src/index.html --public-url ./",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "author": "John",
