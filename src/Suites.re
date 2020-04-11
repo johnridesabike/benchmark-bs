@@ -102,7 +102,60 @@ let intsArr = Belt.List.toArray(ints);|j};
     },
   |];
 
-  let suite = {name, setup, benchmarks};
+  let map = {name, setup, benchmarks};
+
+  let name = "List vs Array: access first item";
+
+  let benchmarks = [|
+    {
+      name: "pattern match",
+      f:
+        (.) => {
+          let _ =
+            switch (ints) {
+            | [x, ..._] => Some(x)
+            | [] => None
+            };
+          ();
+        },
+      code: {j|switch (ints) {
+| [x, ..._] => Some(x)
+| [] => None
+};|j},
+    },
+    {
+      name: "List.hd",
+      f: (.) => ints->List.hd->ignore,
+      code: "ints->List.hd->ignore;",
+    },
+    {
+      name: "Belt.List.head",
+      f: (.) => ints->Belt.List.head->ignore,
+      code: "ints->Belt.List.head->ignore;",
+    },
+    {
+      name: "Belt.List.headExn",
+      f: (.) => ints->Belt.List.headExn->ignore,
+      code: "ints->Belt.List.headExn->ignore;",
+    },
+    {
+      name: "Array.get",
+      f: (.) => intsArr[0]->ignore,
+      code: "intsArr[0]->ignore;",
+    },
+    {
+      name: "Belt.Array.get",
+      f: (.) => Belt.(intsArr[0])->ignore,
+      code: "Belt.(intsArr[0])->ignore;",
+    },
+    {
+      name: "Belt.Array.getExn",
+      f: (.) => intsArr->Belt.Array.getExn(0)->ignore,
+      code: "intsArr->Belt.Array.getExn(0)->ignore;",
+    },
+  |];
+
+  let head = {setup, name, benchmarks};
 };
 
 module Maps = {
@@ -250,7 +303,8 @@ module Routes = {
   /* Register the route to your benchmark by giving it a variant here. */
   type key =
     | Strings
-    | ListArray
+    | ListArrayMap
+    | ListArrayHead
     | MapsGet
     | MapsSet
     | ArrayAccess;
@@ -260,7 +314,8 @@ module Routes = {
   let map =
     fun
     | Strings => {suite: Strings.suite, url: "concat-strings"}
-    | ListArray => {suite: ListArray.suite, url: "list-array"}
+    | ListArrayMap => {suite: ListArray.map, url: "list-array-map"}
+    | ListArrayHead => {suite: ListArray.head, url: "list-array-head"}
     | MapsGet => {suite: Maps.getting, url: "maps-get"}
     | MapsSet => {suite: Maps.setting, url: "maps-set"}
     | ArrayAccess => {suite: ArrayAccess.suite, url: "array-access"};
@@ -268,12 +323,20 @@ module Routes = {
   let fromUrl =
     fun
     | "concat-strings" => Some(Strings)
-    | "list-array" => Some(ListArray)
+    | "list-array-map" => Some(ListArrayMap)
+    | "list-array-head" => Some(ListArrayHead)
     | "maps-get" => Some(MapsGet)
     | "maps-set" => Some(MapsSet)
     | "array-access" => Some(ArrayAccess)
     | _ => None;
 
   /* The main menu uses this array to list pages. */
-  let routes = [|Strings, ListArray, MapsGet, MapsSet, ArrayAccess|];
+  let routes = [|
+    Strings,
+    ListArrayMap,
+    ListArrayHead,
+    MapsGet,
+    MapsSet,
+    ArrayAccess,
+  |];
 };
