@@ -77,3 +77,9 @@ npm run dev
 
 And then navigate to the URL provided in the terminal (usually
 `localhost:1234`). Click on your benchmark and press "run."
+
+## Benchmark.js bindings
+
+This project uses zero-runtime bindings to [Benchmark.js](https://benchmarkjs.com/).
+You can see them in [BenchmarkJs.re](src/BenchmarkJs.re). Feel free to use them
+for your own projects.
