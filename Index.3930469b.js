@@ -35781,7 +35781,7 @@ function Pages$About(Props) {
     href: "https://bucklescript.github.io/"
   }, "BuckleScript"), ". It\'s powered by ", React.createElement("a", {
     href: "https://benchmarkjs.com/"
-  }, "Benchmark.js"), "."), React.createElement("p", undefined, "Understanding performance isn\'t easy, and is made more complicated in\n           Reason. Functions that may be performant on native Reason, but much\n           slower when compiled to JavaScript. Many libraries use functions that\n           appear the same, but may function differently depending on their\n           implementation details."), React.createElement("p", undefined, "To add your own benchmark tests, you will need to ", React.createElement("a", {
+  }, "Benchmark.js"), "."), React.createElement("p", undefined, "Understanding performance isn\'t easy, and is made more complicated in\n           Reason. Functions that may be performant on native Reason, but much\n           slower when compiled to JavaScript. Many libraries use functions that\n           appear the same, but may have different underlying implementations."), React.createElement("p", undefined, "To add your own benchmark tests, you will need to ", React.createElement("a", {
     href: "https://github.com/johnridesabike/benchmark-bs"
   }, "fork and clone this project's git repository"), ". Follow the instructions in its README."));
 }
@@ -46545,6 +46545,7 @@ var ints = Belt_List.makeBy(100, function (i) {
   return i;
 });
 var intsArr = Belt_List.toArray(ints);
+var setup = "let ints = Belt.List.makeBy(100, i => i);\nlet intsArr = Belt.List.toArray(ints);";
 var benchmarks$1 = [{
   name: "List.map",
   code: "ints |> List.map(x => x + 1)",
@@ -46630,11 +46631,91 @@ var benchmarks$1 = [{
     );
   }
 }];
-var suite_setup$1 = "let ints = Belt.List.makeBy(100, i => i);\nlet intsArr = Belt.List.toArray(ints);";
-var suite$1 = {
+var map = {
   name: "List vs Array: Map 100 items",
-  setup: suite_setup$1,
+  setup: setup,
   benchmarks: benchmarks$1
+};
+var benchmarks$2 = [{
+  name: "pattern match",
+  code: "switch (ints) {\n| [x, ..._] => Some(x)\n| [] => None\n};",
+  f: function f() {
+    if (ints) {
+      ints[0];
+    } else {
+      undefined;
+    }
+
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "List.hd",
+  code: "ints->List.hd->ignore;",
+  f: function f() {
+    List.hd(ints);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Belt.List.head",
+  code: "ints->Belt.List.head->ignore;",
+  f: function f() {
+    Belt_List.head(ints);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Belt.List.headExn",
+  code: "ints->Belt.List.headExn->ignore;",
+  f: function f() {
+    Belt_List.headExn(ints);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Array.get",
+  code: "intsArr[0]->ignore;",
+  f: function f() {
+    Caml_array.caml_array_get(intsArr, 0);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Belt.Array.get",
+  code: "Belt.(intsArr[0])->ignore;",
+  f: function f() {
+    Belt_Array.get(intsArr, 0);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Belt.Array.getExn",
+  code: "intsArr->Belt.Array.getExn(0)->ignore;",
+  f: function f() {
+    Belt_Array.getExn(intsArr, 0);
+    return (
+      /* () */
+      0
+    );
+  }
+}];
+var head = {
+  name: "List vs Array: access first item",
+  setup: setup,
+  benchmarks: benchmarks$2
 };
 var StringMap = $$Map.Make({
   compare: $$String.compare
@@ -46647,14 +46728,14 @@ var strings$1 = Belt_Array.makeBy(100, function (param) {
 });
 var dict = Js_dict.fromArray(strings$1);
 var hashmap = Belt_HashMapString.fromArray(strings$1);
-var map = Belt_MapString.fromArray(strings$1);
+var map$1 = Belt_MapString.fromArray(strings$1);
 var stdlibMap = Belt_Array.reduce(strings$1, StringMap.empty, function (acc, param) {
   return Curry._3(StringMap.add, param[0], param[1], acc);
 });
 var match = Caml_array.caml_array_get(strings$1, 0);
 var key = match[0];
-var setup = "[@bs.module \"nanoid\"] external randomString: unit => string = \"nanoid\";\nmodule StringMap = Map.Make(String);\nlet strings = Belt.Array.makeBy(100, _ => (randomString(), randomString()));\nlet dict = Js.Dict.fromArray(strings);\nlet hashmap = Belt.HashMap.String.fromArray(strings);\nlet map = Belt.Map.String.fromArray(strings);\nlet stdlibMap =\n  Belt.Array.reduce(strings, StringMap.empty, (acc, (k, v)) =>\n    StringMap.add(k, v, acc)\n  );\nlet (key, _) = strings[0];";
-var benchmarks$2 = [{
+var setup$1 = "[@bs.module \"nanoid\"] external randomString: unit => string = \"nanoid\";\nmodule StringMap = Map.Make(String);\nlet strings = Belt.Array.makeBy(100, _ => (randomString(), randomString()));\nlet dict = Js.Dict.fromArray(strings);\nlet hashmap = Belt.HashMap.String.fromArray(strings);\nlet map = Belt.Map.String.fromArray(strings);\nlet stdlibMap =\n  Belt.Array.reduce(strings, StringMap.empty, (acc, (k, v)) =>\n    StringMap.add(k, v, acc)\n  );\nlet (key, _) = strings[0];";
+var benchmarks$3 = [{
   name: "Map.Make(String).find",
   code: "stdlibMap |> StringMap.find(key)",
   f: function f() {
@@ -46669,7 +46750,7 @@ var benchmarks$2 = [{
   name: "Belt.Map.String.get",
   code: "map->Belt.Map.String.get(key)",
   f: function f() {
-    Belt_MapString.get(map, key);
+    Belt_MapString.get(map$1, key);
     return (
       /* () */
       0
@@ -46698,11 +46779,11 @@ var benchmarks$2 = [{
 }];
 var getting = {
   name: "Maps: Getting a key from a map with 100 items",
-  setup: setup,
-  benchmarks: benchmarks$2
+  setup: setup$1,
+  benchmarks: benchmarks$3
 };
-var setup$1 = setup + "\n\n[@bs.val] [@bs.scope \"Object\"]\nexternal assign: (Js.Dict.t(\'a), Js.Dict.t(\'a)) => Js.Dict.t(\'a) =\n  \"assign\";\nlet cloneDict = d => assign(Js.Dict.empty(), d);";
-var benchmarks$3 = [{
+var setup$2 = setup$1 + "\n\n[@bs.val] [@bs.scope \"Object\"]\nexternal assign: (Js.Dict.t(\'a), Js.Dict.t(\'a)) => Js.Dict.t(\'a) =\n  \"assign\";\nlet cloneDict = d => assign(Js.Dict.empty(), d);";
+var benchmarks$4 = [{
   name: "Map.Make(String).add",
   code: "stdlibMap |> StringMap.add(key, \"a\")",
   f: function f() {
@@ -46717,7 +46798,7 @@ var benchmarks$3 = [{
   name: "Belt.Map.String.set",
   code: "map->Belt.Map.String.set(key, \"a\")",
   f: function f() {
-    Belt_MapString.set(map, key, "a");
+    Belt_MapString.set(map$1, key, "a");
     return (
       /* () */
       0
@@ -46746,11 +46827,11 @@ var benchmarks$3 = [{
 }];
 var setting = {
   name: "Maps: Immutably setting a key from a map with 100 items",
-  setup: setup$1,
-  benchmarks: benchmarks$3
+  setup: setup$2,
+  benchmarks: benchmarks$4
 };
 var arr = Belt_Array.make(100, "a");
-var benchmarks$4 = [{
+var benchmarks$5 = [{
   name: "Array.get",
   code: "arr[50];",
   f: function f() {
@@ -46781,14 +46862,14 @@ var benchmarks$4 = [{
     );
   }
 }];
-var suite_setup$2 = "let arr = Belt.Array.make(100, \"a\");";
-var suite$2 = {
+var suite_setup$1 = "let arr = Belt.Array.make(100, \"a\");";
+var suite$1 = {
   name: "Array access",
-  setup: suite_setup$2,
-  benchmarks: benchmarks$4
+  setup: suite_setup$1,
+  benchmarks: benchmarks$5
 };
 
-function map$1(param) {
+function map$2(param) {
   switch (param) {
     case
     /* Strings */
@@ -46799,16 +46880,24 @@ function map$1(param) {
       };
 
     case
-    /* ListArray */
+    /* ListArrayMap */
     1:
       return {
-        suite: suite$1,
-        url: "list-array"
+        suite: map,
+        url: "list-array-map"
+      };
+
+    case
+    /* ListArrayHead */
+    2:
+      return {
+        suite: head,
+        url: "list-array-head"
       };
 
     case
     /* MapsGet */
-    2:
+    3:
       return {
         suite: getting,
         url: "maps-get"
@@ -46816,7 +46905,7 @@ function map$1(param) {
 
     case
     /* MapsSet */
-    3:
+    4:
       return {
         suite: setting,
         url: "maps-set"
@@ -46824,9 +46913,9 @@ function map$1(param) {
 
     case
     /* ArrayAccess */
-    4:
+    5:
       return {
-        suite: suite$2,
+        suite: suite$1,
         url: "array-access"
       };
   }
@@ -46837,7 +46926,7 @@ function fromUrl(param) {
     case "array-access":
       return (
         /* ArrayAccess */
-        4
+        5
       );
 
     case "concat-strings":
@@ -46846,22 +46935,28 @@ function fromUrl(param) {
         0
       );
 
-    case "list-array":
+    case "list-array-head":
       return (
-        /* ListArray */
+        /* ListArrayHead */
+        2
+      );
+
+    case "list-array-map":
+      return (
+        /* ListArrayMap */
         1
       );
 
     case "maps-get":
       return (
         /* MapsGet */
-        2
+        3
       );
 
     case "maps-set":
       return (
         /* MapsSet */
-        3
+        4
       );
 
     default:
@@ -46872,16 +46967,18 @@ function fromUrl(param) {
 var routes = [
 /* Strings */
 0,
-/* ListArray */
+/* ListArrayMap */
 1,
-/* MapsGet */
+/* ListArrayHead */
 2,
-/* MapsSet */
+/* MapsGet */
 3,
+/* MapsSet */
+4,
 /* ArrayAccess */
-4];
+5];
 var Routes = {
-  map: map$1,
+  map: map$2,
   fromUrl: fromUrl,
   routes: routes
 };
@@ -47416,7 +47513,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59178" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60778" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
