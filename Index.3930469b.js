@@ -46727,6 +46727,7 @@ var strings$1 = Belt_Array.makeBy(100, function (param) {
   );
 });
 var dict = Js_dict.fromArray(strings$1);
+var jsMap = new Map(strings$1);
 var hashmap = Belt_HashMapString.fromArray(strings$1);
 var map$1 = Belt_MapString.fromArray(strings$1);
 var stdlibMap = Belt_Array.reduce(strings$1, StringMap.empty, function (acc, param) {
@@ -46734,7 +46735,7 @@ var stdlibMap = Belt_Array.reduce(strings$1, StringMap.empty, function (acc, par
 });
 var match = Caml_array.caml_array_get(strings$1, 0);
 var key = match[0];
-var setup$1 = "[@bs.module \"nanoid\"] external randomString: unit => string = \"nanoid\";\nmodule StringMap = Map.Make(String);\nlet strings = Belt.Array.makeBy(100, _ => (randomString(), randomString()));\nlet dict = Js.Dict.fromArray(strings);\nlet hashmap = Belt.HashMap.String.fromArray(strings);\nlet map = Belt.Map.String.fromArray(strings);\nlet stdlibMap =\n  Belt.Array.reduce(strings, StringMap.empty, (acc, (k, v)) =>\n    StringMap.add(k, v, acc)\n  );\nlet (key, _) = strings[0];";
+var setup$1 = "[@bs.module \"nanoid\"] external randomString: unit => string = \"nanoid\";\n\nmodule JsMap = {\n  type t(\'key, \'value);\n  [@bs.new] external fromArray: array((\'key, \'value)) => t(\'key, \'value) = \"Map\";\n  [@bs.new] external copy: t(\'key, \'value) => t(\'key, \'value) = \"Map\";\n  [@bs.send] external set: (t(\'key, \'value), \'key, \'value) => unit = \"set\";\n  [@bs.send] external get: (t(\'key, \'value), \'key) => \'value = \"get\";\n};\n\nmodule StringMap = Map.Make(String);\nlet strings = Belt.Array.makeBy(100, _ => (randomString(), randomString()));\nlet dict = Js.Dict.fromArray(strings);\nlet jsMap = JsMap.fromArray(strings);\nlet hashmap = Belt.HashMap.String.fromArray(strings);\nlet map = Belt.Map.String.fromArray(strings);\nlet stdlibMap =\n  Belt.Array.reduce(strings, StringMap.empty, (acc, (k, v)) =>\n    StringMap.add(k, v, acc)\n  );\nlet (key, _) = strings[0];";
 var benchmarks$3 = [{
   name: "Map.Make(String).find",
   code: "stdlibMap |> StringMap.find(key)",
@@ -46771,6 +46772,16 @@ var benchmarks$3 = [{
   code: "dict->Js.Dict.get(key)",
   f: function f() {
     Js_dict.get(dict, key);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "JsMap get",
+  code: "jsMap->JsMap.get(key)",
+  f: function f() {
+    jsMap.get(key);
     return (
       /* () */
       0
@@ -46819,6 +46830,16 @@ var benchmarks$4 = [{
   code: "dict->cloneDict->Js.Dict.get(key, \"a\")",
   f: function f() {
     Object.assign({}, dict)[key] = "a";
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "JsMap copy->set",
+  code: "jsMap->JsMap.copy->JsMap.set(key, \"a\")",
+  f: function f() {
+    new Map(jsMap).set(key, "a");
     return (
       /* () */
       0
@@ -47166,18 +47187,28 @@ function App$Item(Props) {
     window.Prism.highlightAll();
     suite.add(name, f, {
       onComplete: function onComplete(param) {
-        return setResult(
-        /* Complete */
-        [
-        /* time */
-        Date.now(),
-        /* benchmark */
-        param.currentTarget]);
+        var currentTarget = param.currentTarget;
+
+        if (currentTarget.aborted) {
+          return 0;
+        } else {
+          return setResult(
+          /* Complete */
+          [
+          /* time */
+          Date.now(),
+          /* benchmark */
+          currentTarget]);
+        }
       },
       onStart: function onStart(param) {
-        return setResult(
-        /* Running */
-        1);
+        if (param.currentTarget.aborted) {
+          return 0;
+        } else {
+          return setResult(
+          /* Running */
+          1);
+        }
       }
     });
     return;
@@ -47351,13 +47382,21 @@ function App$Wrapper(Props) {
   var suiteRunning = match[0];
   React.useEffect(function () {
     suite.on("start", function (param) {
-      return setRunning(
-      /* Started */
-      Block.__(0, [
-      /* time */
-      Date.now()]));
+      if (param.currentTarget.aborted) {
+        return 0;
+      } else {
+        return setRunning(
+        /* Started */
+        Block.__(0, [
+        /* time */
+        Date.now()]));
+      }
     }).on("complete", function (e) {
-      return setRunning(getStats(e));
+      if (e.currentTarget.aborted) {
+        return 0;
+      } else {
+        return setRunning(getStats(e));
+      }
     });
     return function (param) {
       suite.abort();
@@ -47513,7 +47552,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60778" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53569" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
