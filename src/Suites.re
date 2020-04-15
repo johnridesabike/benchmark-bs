@@ -314,6 +314,48 @@ module ArrayAccess = {
   let suite = {setup, name, benchmarks};
 };
 
+module ArraySort = {
+  let name = "Array sorting";
+
+  let arr = Belt.Array.make(100, Js.Math.random_int(-1000, 1000));
+  let intCmp = (. a: int, b: int) => compare(a, b);
+
+  let setup = {j|let arr = Belt.Array.make(100, Js.Math.random_int(-1000, 1000));
+let intCmp = (. a: int, b: int) => compare(a, b);|j};
+
+  let benchmarks = [|
+    {
+      name: "Belt.SortArray.Int",
+      code: "arr->Belt.SortArray.Int.stableSort;",
+      f: (.) => arr->Belt.SortArray.Int.stableSort->ignore,
+    },
+    {
+      name: "Belt.SortArray.stableSortBy",
+      code: "arr->Belt.SortArray.stableSortBy(compare);",
+      f: (.) => arr->Belt.SortArray.stableSortBy(compare)->ignore,
+    },
+    {
+      name: "Belt.SortArray.stableSortByU",
+      code: "arr->Belt.SortArray.stableSortByU(intCmp);",
+      f: (.) => arr->Belt.SortArray.stableSortByU(intCmp)->ignore,
+    },
+    {
+      name: "Js.Array.(copy |> sortInPlace)",
+      code: "arr |> Js.Array.copy |> Js.Array.sortInPlace;",
+      f: (.) => arr |> Js.Array.copy |> Js.Array.sortInPlace |> ignore,
+    },
+    {
+      name: "Js.Array.(copy |> sortInPlaceWith)",
+      code: "arr |> Js.Array.copy |> Js.Array.sortInPlaceWith(compare);",
+      f:
+        (.) =>
+          arr |> Js.Array.copy |> Js.Array.sortInPlaceWith(compare) |> ignore,
+    },
+  |];
+
+  let suite = {name, setup, benchmarks};
+};
+
 /* Add your own benchmark here. */
 
 /*
@@ -338,7 +380,8 @@ module Routes = {
     | ListArrayHead
     | MapsGet
     | MapsSet
-    | ArrayAccess;
+    | ArrayAccess
+    | ArraySort;
 
   /* Make sure the URLs are the same in both functions! */
 
@@ -349,7 +392,8 @@ module Routes = {
     | ListArrayHead => {suite: ListArray.head, url: "list-array-head"}
     | MapsGet => {suite: Maps.getting, url: "maps-get"}
     | MapsSet => {suite: Maps.setting, url: "maps-set"}
-    | ArrayAccess => {suite: ArrayAccess.suite, url: "array-access"};
+    | ArrayAccess => {suite: ArrayAccess.suite, url: "array-access"}
+    | ArraySort => {suite: ArraySort.suite, url: "array-sort"};
 
   let fromUrl =
     fun
@@ -359,6 +403,7 @@ module Routes = {
     | "maps-get" => Some(MapsGet)
     | "maps-set" => Some(MapsSet)
     | "array-access" => Some(ArrayAccess)
+    | "array-sort" => Some(ArraySort)
     | _ => None;
 
   /* The main menu uses this array to list pages. */
@@ -369,5 +414,6 @@ module Routes = {
     MapsGet,
     MapsSet,
     ArrayAccess,
+    ArraySort,
   |];
 };
