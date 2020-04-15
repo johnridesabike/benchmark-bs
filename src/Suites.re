@@ -162,9 +162,20 @@ module Maps = {
   let name = "Maps: Getting a key from a map with 100 items";
 
   [@bs.module "nanoid"] external randomString: unit => string = "nanoid";
+
+  module JsMap = {
+    type t('key, 'value);
+    [@bs.new]
+    external fromArray: array(('key, 'value)) => t('key, 'value) = "Map";
+    [@bs.new] external copy: t('key, 'value) => t('key, 'value) = "Map";
+    [@bs.send] external set: (t('key, 'value), 'key, 'value) => unit = "set";
+    [@bs.send] external get: (t('key, 'value), 'key) => 'value = "get";
+  };
+
   module StringMap = Map.Make(String);
   let strings = Belt.Array.makeBy(100, _ => (randomString(), randomString()));
   let dict = Js.Dict.fromArray(strings);
+  let jsMap = JsMap.fromArray(strings);
   let hashmap = Belt.HashMap.String.fromArray(strings);
   let map = Belt.Map.String.fromArray(strings);
   let stdlibMap =
@@ -174,9 +185,19 @@ module Maps = {
   let (key, _) = strings[0];
 
   let setup = {j|[@bs.module "nanoid"] external randomString: unit => string = "nanoid";
+
+module JsMap = {
+  type t('key, 'value);
+  [@bs.new] external fromArray: array(('key, 'value)) => t('key, 'value) = "Map";
+  [@bs.new] external copy: t('key, 'value) => t('key, 'value) = "Map";
+  [@bs.send] external set: (t('key, 'value), 'key, 'value) => unit = "set";
+  [@bs.send] external get: (t('key, 'value), 'key) => 'value = "get";
+};
+
 module StringMap = Map.Make(String);
 let strings = Belt.Array.makeBy(100, _ => (randomString(), randomString()));
 let dict = Js.Dict.fromArray(strings);
+let jsMap = JsMap.fromArray(strings);
 let hashmap = Belt.HashMap.String.fromArray(strings);
 let map = Belt.Map.String.fromArray(strings);
 let stdlibMap =
@@ -205,6 +226,11 @@ let (key, _) = strings[0];|j};
       name: "Js.Dict.get",
       f: (.) => dict->Js.Dict.get(key)->ignore,
       code: "dict->Js.Dict.get(key)",
+    },
+    {
+      name: "JsMap get",
+      f: (.) => jsMap->JsMap.get(key)->ignore,
+      code: "jsMap->JsMap.get(key)",
     },
   |];
 
@@ -253,6 +279,11 @@ let cloneDict = d => assign(Js.Dict.empty(), d);|j};
       name: "cloneDict->Js.Dict.set",
       f: (.) => dict->cloneDict->Js.Dict.set(key, "a")->ignore,
       code: {j|dict->cloneDict->Js.Dict.get(key, "a")|j},
+    },
+    {
+      name: "JsMap copy->set",
+      f: (.) => jsMap->JsMap.copy->JsMap.set(key, "a")->ignore,
+      code: {j|jsMap->JsMap.copy->JsMap.set(key, "a")|j},
     },
   |];
 
