@@ -45768,7 +45768,404 @@ exports.mapWithKeyU = mapWithKeyU;
 exports.mapWithKey = mapWithKey;
 /* No side effect */
 
-},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js","./belt_internalAVLtree.js":"../node_modules/bs-platform/lib/js/belt_internalAVLtree.js","./belt_internalMapString.js":"../node_modules/bs-platform/lib/js/belt_internalMapString.js"}],"../node_modules/bs-platform/lib/js/caml_hash_primitive.js":[function(require,module,exports) {
+},{"./curry.js":"../node_modules/bs-platform/lib/js/curry.js","./caml_option.js":"../node_modules/bs-platform/lib/js/caml_option.js","./belt_internalAVLtree.js":"../node_modules/bs-platform/lib/js/belt_internalAVLtree.js","./belt_internalMapString.js":"../node_modules/bs-platform/lib/js/belt_internalMapString.js"}],"../node_modules/bs-platform/lib/js/belt_SortArrayInt.js":[function(require,module,exports) {
+'use strict';
+
+var Belt_Array = require("./belt_Array.js");
+
+function sortedLengthAuxMore(xs, _prec, _acc, len) {
+  while(true) {
+    var acc = _acc;
+    var prec = _prec;
+    if (acc >= len) {
+      return acc;
+    } else {
+      var v = xs[acc];
+      if (prec > v) {
+        _acc = acc + 1 | 0;
+        _prec = v;
+        continue ;
+      } else {
+        return acc;
+      }
+    }
+  };
+}
+
+function strictlySortedLength(xs) {
+  var len = xs.length;
+  if (len === 0 || len === 1) {
+    return len;
+  } else {
+    var x0 = xs[0];
+    var x1 = xs[1];
+    if (x0 < x1) {
+      var xs$1 = xs;
+      var _prec = x1;
+      var _acc = 2;
+      var len$1 = len;
+      while(true) {
+        var acc = _acc;
+        var prec = _prec;
+        if (acc >= len$1) {
+          return acc;
+        } else {
+          var v = xs$1[acc];
+          if (prec < v) {
+            _acc = acc + 1 | 0;
+            _prec = v;
+            continue ;
+          } else {
+            return acc;
+          }
+        }
+      };
+    } else if (x0 > x1) {
+      return -sortedLengthAuxMore(xs, x1, 2, len) | 0;
+    } else {
+      return 1;
+    }
+  }
+}
+
+function isSorted(a) {
+  var len = a.length;
+  if (len === 0) {
+    return true;
+  } else {
+    var a$1 = a;
+    var _i = 0;
+    var last_bound = len - 1 | 0;
+    while(true) {
+      var i = _i;
+      if (i === last_bound) {
+        return true;
+      } else if (a$1[i] <= a$1[i + 1 | 0]) {
+        _i = i + 1 | 0;
+        continue ;
+      } else {
+        return false;
+      }
+    };
+  }
+}
+
+function merge(src, src1ofs, src1len, src2, src2ofs, src2len, dst, dstofs) {
+  var src1r = src1ofs + src1len | 0;
+  var src2r = src2ofs + src2len | 0;
+  var _i1 = src1ofs;
+  var _s1 = src[src1ofs];
+  var _i2 = src2ofs;
+  var _s2 = src2[src2ofs];
+  var _d = dstofs;
+  while(true) {
+    var d = _d;
+    var s2 = _s2;
+    var i2 = _i2;
+    var s1 = _s1;
+    var i1 = _i1;
+    if (s1 <= s2) {
+      dst[d] = s1;
+      var i1$1 = i1 + 1 | 0;
+      if (i1$1 < src1r) {
+        _d = d + 1 | 0;
+        _s1 = src[i1$1];
+        _i1 = i1$1;
+        continue ;
+      } else {
+        return Belt_Array.blitUnsafe(src2, i2, dst, d + 1 | 0, src2r - i2 | 0);
+      }
+    } else {
+      dst[d] = s2;
+      var i2$1 = i2 + 1 | 0;
+      if (i2$1 < src2r) {
+        _d = d + 1 | 0;
+        _s2 = src2[i2$1];
+        _i2 = i2$1;
+        continue ;
+      } else {
+        return Belt_Array.blitUnsafe(src, i1, dst, d + 1 | 0, src1r - i1 | 0);
+      }
+    }
+  };
+}
+
+function union(src, src1ofs, src1len, src2, src2ofs, src2len, dst, dstofs) {
+  var src1r = src1ofs + src1len | 0;
+  var src2r = src2ofs + src2len | 0;
+  var _i1 = src1ofs;
+  var _s1 = src[src1ofs];
+  var _i2 = src2ofs;
+  var _s2 = src2[src2ofs];
+  var _d = dstofs;
+  while(true) {
+    var d = _d;
+    var s2 = _s2;
+    var i2 = _i2;
+    var s1 = _s1;
+    var i1 = _i1;
+    if (s1 < s2) {
+      dst[d] = s1;
+      var i1$1 = i1 + 1 | 0;
+      var d$1 = d + 1 | 0;
+      if (i1$1 < src1r) {
+        _d = d$1;
+        _s1 = src[i1$1];
+        _i1 = i1$1;
+        continue ;
+      } else {
+        Belt_Array.blitUnsafe(src2, i2, dst, d$1, src2r - i2 | 0);
+        return (d$1 + src2r | 0) - i2 | 0;
+      }
+    } else if (s1 === s2) {
+      dst[d] = s1;
+      var i1$2 = i1 + 1 | 0;
+      var i2$1 = i2 + 1 | 0;
+      var d$2 = d + 1 | 0;
+      if (i1$2 < src1r && i2$1 < src2r) {
+        _d = d$2;
+        _s2 = src2[i2$1];
+        _i2 = i2$1;
+        _s1 = src[i1$2];
+        _i1 = i1$2;
+        continue ;
+      } else if (i1$2 === src1r) {
+        Belt_Array.blitUnsafe(src2, i2$1, dst, d$2, src2r - i2$1 | 0);
+        return (d$2 + src2r | 0) - i2$1 | 0;
+      } else {
+        Belt_Array.blitUnsafe(src, i1$2, dst, d$2, src1r - i1$2 | 0);
+        return (d$2 + src1r | 0) - i1$2 | 0;
+      }
+    } else {
+      dst[d] = s2;
+      var i2$2 = i2 + 1 | 0;
+      var d$3 = d + 1 | 0;
+      if (i2$2 < src2r) {
+        _d = d$3;
+        _s2 = src2[i2$2];
+        _i2 = i2$2;
+        continue ;
+      } else {
+        Belt_Array.blitUnsafe(src, i1, dst, d$3, src1r - i1 | 0);
+        return (d$3 + src1r | 0) - i1 | 0;
+      }
+    }
+  };
+}
+
+function intersect(src, src1ofs, src1len, src2, src2ofs, src2len, dst, dstofs) {
+  var src1r = src1ofs + src1len | 0;
+  var src2r = src2ofs + src2len | 0;
+  var _i1 = src1ofs;
+  var _s1 = src[src1ofs];
+  var _i2 = src2ofs;
+  var _s2 = src2[src2ofs];
+  var _d = dstofs;
+  while(true) {
+    var d = _d;
+    var s2 = _s2;
+    var i2 = _i2;
+    var s1 = _s1;
+    var i1 = _i1;
+    if (s1 < s2) {
+      var i1$1 = i1 + 1 | 0;
+      if (i1$1 < src1r) {
+        _s1 = src[i1$1];
+        _i1 = i1$1;
+        continue ;
+      } else {
+        return d;
+      }
+    } else if (s1 === s2) {
+      dst[d] = s1;
+      var i1$2 = i1 + 1 | 0;
+      var i2$1 = i2 + 1 | 0;
+      var d$1 = d + 1 | 0;
+      if (i1$2 < src1r && i2$1 < src2r) {
+        _d = d$1;
+        _s2 = src2[i2$1];
+        _i2 = i2$1;
+        _s1 = src[i1$2];
+        _i1 = i1$2;
+        continue ;
+      } else {
+        return d$1;
+      }
+    } else {
+      var i2$2 = i2 + 1 | 0;
+      if (i2$2 < src2r) {
+        _s2 = src2[i2$2];
+        _i2 = i2$2;
+        continue ;
+      } else {
+        return d;
+      }
+    }
+  };
+}
+
+function diff(src, src1ofs, src1len, src2, src2ofs, src2len, dst, dstofs) {
+  var src1r = src1ofs + src1len | 0;
+  var src2r = src2ofs + src2len | 0;
+  var _i1 = src1ofs;
+  var _s1 = src[src1ofs];
+  var _i2 = src2ofs;
+  var _s2 = src2[src2ofs];
+  var _d = dstofs;
+  while(true) {
+    var d = _d;
+    var s2 = _s2;
+    var i2 = _i2;
+    var s1 = _s1;
+    var i1 = _i1;
+    if (s1 < s2) {
+      dst[d] = s1;
+      var d$1 = d + 1 | 0;
+      var i1$1 = i1 + 1 | 0;
+      if (i1$1 < src1r) {
+        _d = d$1;
+        _s1 = src[i1$1];
+        _i1 = i1$1;
+        continue ;
+      } else {
+        return d$1;
+      }
+    } else if (s1 === s2) {
+      var i1$2 = i1 + 1 | 0;
+      var i2$1 = i2 + 1 | 0;
+      if (i1$2 < src1r && i2$1 < src2r) {
+        _s2 = src2[i2$1];
+        _i2 = i2$1;
+        _s1 = src[i1$2];
+        _i1 = i1$2;
+        continue ;
+      } else if (i1$2 === src1r) {
+        return d;
+      } else {
+        Belt_Array.blitUnsafe(src, i1$2, dst, d, src1r - i1$2 | 0);
+        return (d + src1r | 0) - i1$2 | 0;
+      }
+    } else {
+      var i2$2 = i2 + 1 | 0;
+      if (i2$2 < src2r) {
+        _s2 = src2[i2$2];
+        _i2 = i2$2;
+        continue ;
+      } else {
+        Belt_Array.blitUnsafe(src, i1, dst, d, src1r - i1 | 0);
+        return (d + src1r | 0) - i1 | 0;
+      }
+    }
+  };
+}
+
+function insertionSort(src, srcofs, dst, dstofs, len) {
+  for(var i = 0 ,i_finish = len - 1 | 0; i <= i_finish; ++i){
+    var e = src[srcofs + i | 0];
+    var j = (dstofs + i | 0) - 1 | 0;
+    while(j >= dstofs && dst[j] > e) {
+      dst[j + 1 | 0] = dst[j];
+      j = j - 1 | 0;
+    };
+    dst[j + 1 | 0] = e;
+  }
+  return /* () */0;
+}
+
+function sortTo(src, srcofs, dst, dstofs, len) {
+  if (len <= 5) {
+    return insertionSort(src, srcofs, dst, dstofs, len);
+  } else {
+    var l1 = len / 2 | 0;
+    var l2 = len - l1 | 0;
+    sortTo(src, srcofs + l1 | 0, dst, dstofs + l1 | 0, l2);
+    sortTo(src, srcofs, src, srcofs + l2 | 0, l1);
+    return merge(src, srcofs + l2 | 0, l1, dst, dstofs + l1 | 0, l2, dst, dstofs);
+  }
+}
+
+function stableSortInPlace(a) {
+  var l = a.length;
+  if (l <= 5) {
+    return insertionSort(a, 0, a, 0, l);
+  } else {
+    var l1 = l / 2 | 0;
+    var l2 = l - l1 | 0;
+    var t = new Array(l2);
+    sortTo(a, l1, t, 0, l2);
+    sortTo(a, 0, a, l2, l1);
+    return merge(a, l2, l1, t, 0, l2, a, 0);
+  }
+}
+
+function stableSort(a) {
+  var b = a.slice(0);
+  stableSortInPlace(b);
+  return b;
+}
+
+function binarySearch(sorted, key) {
+  var len = sorted.length;
+  if (len === 0) {
+    return -1;
+  } else {
+    var lo = sorted[0];
+    if (key < lo) {
+      return -1;
+    } else {
+      var hi = sorted[len - 1 | 0];
+      if (key > hi) {
+        return -(len + 1 | 0) | 0;
+      } else {
+        var arr = sorted;
+        var _lo = 0;
+        var _hi = len - 1 | 0;
+        var key$1 = key;
+        while(true) {
+          var hi$1 = _hi;
+          var lo$1 = _lo;
+          var mid = (lo$1 + hi$1 | 0) / 2 | 0;
+          var midVal = arr[mid];
+          if (key$1 === midVal) {
+            return mid;
+          } else if (key$1 < midVal) {
+            if (hi$1 === mid) {
+              if (arr[lo$1] === key$1) {
+                return lo$1;
+              } else {
+                return -(hi$1 + 1 | 0) | 0;
+              }
+            } else {
+              _hi = mid;
+              continue ;
+            }
+          } else if (lo$1 === mid) {
+            if (arr[hi$1] === key$1) {
+              return hi$1;
+            } else {
+              return -(hi$1 + 1 | 0) | 0;
+            }
+          } else {
+            _lo = mid;
+            continue ;
+          }
+        };
+      }
+    }
+  }
+}
+
+exports.strictlySortedLength = strictlySortedLength;
+exports.isSorted = isSorted;
+exports.stableSortInPlace = stableSortInPlace;
+exports.stableSort = stableSort;
+exports.binarySearch = binarySearch;
+exports.union = union;
+exports.intersect = intersect;
+exports.diff = diff;
+/* No side effect */
+
+},{"./belt_Array.js":"../node_modules/bs-platform/lib/js/belt_Array.js"}],"../node_modules/bs-platform/lib/js/caml_hash_primitive.js":[function(require,module,exports) {
 'use strict';
 
 var Caml_int32 = require("./caml_int32.js");
@@ -46473,6 +46870,8 @@ var Nanoid = require("nanoid");
 
 var Js_dict = require("bs-platform/lib/js/js_dict.js");
 
+var Js_math = require("bs-platform/lib/js/js_math.js");
+
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
 
 var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
@@ -46480,6 +46879,12 @@ var Belt_Array = require("bs-platform/lib/js/belt_Array.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 
 var Belt_MapString = require("bs-platform/lib/js/belt_MapString.js");
+
+var Belt_SortArray = require("bs-platform/lib/js/belt_SortArray.js");
+
+var Caml_primitive = require("bs-platform/lib/js/caml_primitive.js");
+
+var Belt_SortArrayInt = require("bs-platform/lib/js/belt_SortArrayInt.js");
 
 var Belt_HashMapString = require("bs-platform/lib/js/belt_HashMapString.js");
 
@@ -46889,6 +47294,65 @@ var suite$1 = {
   setup: suite_setup$1,
   benchmarks: benchmarks$5
 };
+var arr$1 = Belt_Array.make(100, Js_math.random_int(-1000, 1000));
+var intCmp = Caml_primitive.caml_int_compare;
+var benchmarks$6 = [{
+  name: "Belt.SortArray.Int",
+  code: "arr->Belt.SortArray.Int.stableSort;",
+  f: function f() {
+    Belt_SortArrayInt.stableSort(arr$1);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Belt.SortArray.stableSortBy",
+  code: "arr->Belt.SortArray.stableSortBy(compare);",
+  f: function f() {
+    Belt_SortArray.stableSortBy(arr$1, Caml_primitive.caml_int_compare);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Belt.SortArray.stableSortByU",
+  code: "arr->Belt.SortArray.stableSortByU(intCmp);",
+  f: function f() {
+    Belt_SortArray.stableSortByU(arr$1, intCmp);
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Js.Array.(copy |> sortInPlace)",
+  code: "arr |> Js.Array.copy |> Js.Array.sortInPlace;",
+  f: function f() {
+    arr$1.slice().sort();
+    return (
+      /* () */
+      0
+    );
+  }
+}, {
+  name: "Js.Array.(copy |> sortInPlaceWith)",
+  code: "arr |> Js.Array.copy |> Js.Array.sortInPlaceWith(compare);",
+  f: function f() {
+    arr$1.slice().sort(Caml_primitive.caml_int_compare);
+    return (
+      /* () */
+      0
+    );
+  }
+}];
+var suite_setup$2 = "let arr = Belt.Array.make(100, Js.Math.random_int(-1000, 1000));\nlet intCmp = (. a: int, b: int) => compare(a, b);";
+var suite$2 = {
+  name: "Array sorting",
+  setup: suite_setup$2,
+  benchmarks: benchmarks$6
+};
 
 function map$2(param) {
   switch (param) {
@@ -46939,6 +47403,14 @@ function map$2(param) {
         suite: suite$1,
         url: "array-access"
       };
+
+    case
+    /* ArraySort */
+    6:
+      return {
+        suite: suite$2,
+        url: "array-sort"
+      };
   }
 }
 
@@ -46948,6 +47420,12 @@ function fromUrl(param) {
       return (
         /* ArrayAccess */
         5
+      );
+
+    case "array-sort":
+      return (
+        /* ArraySort */
+        6
       );
 
     case "concat-strings":
@@ -46997,7 +47475,9 @@ var routes = [
 /* MapsSet */
 4,
 /* ArrayAccess */
-5];
+5,
+/* ArraySort */
+6];
 var Routes = {
   map: map$2,
   fromUrl: fromUrl,
@@ -47005,7 +47485,7 @@ var Routes = {
 };
 exports.Routes = Routes;
 /* strings Not a pure module */
-},{"bs-platform/lib/js/map.js":"../node_modules/bs-platform/lib/js/map.js","bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"../node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/string.js":"../node_modules/bs-platform/lib/js/string.js","nanoid":"../node_modules/nanoid/index.browser.js","bs-platform/lib/js/js_dict.js":"../node_modules/bs-platform/lib/js/js_dict.js","bs-platform/lib/js/belt_List.js":"../node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/belt_Array.js":"../node_modules/bs-platform/lib/js/belt_Array.js","bs-platform/lib/js/caml_array.js":"../node_modules/bs-platform/lib/js/caml_array.js","bs-platform/lib/js/belt_MapString.js":"../node_modules/bs-platform/lib/js/belt_MapString.js","bs-platform/lib/js/belt_HashMapString.js":"../node_modules/bs-platform/lib/js/belt_HashMapString.js"}],"Router.bs.js":[function(require,module,exports) {
+},{"bs-platform/lib/js/map.js":"../node_modules/bs-platform/lib/js/map.js","bs-platform/lib/js/list.js":"../node_modules/bs-platform/lib/js/list.js","bs-platform/lib/js/array.js":"../node_modules/bs-platform/lib/js/array.js","bs-platform/lib/js/curry.js":"../node_modules/bs-platform/lib/js/curry.js","bs-platform/lib/js/string.js":"../node_modules/bs-platform/lib/js/string.js","nanoid":"../node_modules/nanoid/index.browser.js","bs-platform/lib/js/js_dict.js":"../node_modules/bs-platform/lib/js/js_dict.js","bs-platform/lib/js/js_math.js":"../node_modules/bs-platform/lib/js/js_math.js","bs-platform/lib/js/belt_List.js":"../node_modules/bs-platform/lib/js/belt_List.js","bs-platform/lib/js/belt_Array.js":"../node_modules/bs-platform/lib/js/belt_Array.js","bs-platform/lib/js/caml_array.js":"../node_modules/bs-platform/lib/js/caml_array.js","bs-platform/lib/js/belt_MapString.js":"../node_modules/bs-platform/lib/js/belt_MapString.js","bs-platform/lib/js/belt_SortArray.js":"../node_modules/bs-platform/lib/js/belt_SortArray.js","bs-platform/lib/js/caml_primitive.js":"../node_modules/bs-platform/lib/js/caml_primitive.js","bs-platform/lib/js/belt_SortArrayInt.js":"../node_modules/bs-platform/lib/js/belt_SortArrayInt.js","bs-platform/lib/js/belt_HashMapString.js":"../node_modules/bs-platform/lib/js/belt_HashMapString.js"}],"Router.bs.js":[function(require,module,exports) {
 // Generated by BUCKLESCRIPT, PLEASE EDIT WITH CARE
 'use strict';
 
@@ -47552,7 +48032,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53569" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55323" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
