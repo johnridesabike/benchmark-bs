@@ -97,13 +97,21 @@ module Item = {
           ~f,
           ~options=
             B.Options.make(
-              ~onStart=(. _) => {setResult(. Running)},
+              ~onStart=
+                (. B.Event.{currentTarget, _}) =>
+                  if (!currentTarget.B.Benchmark.aborted) {
+                    setResult(. Running);
+                  },
               ~onComplete=
-                (. B.Event.{currentTarget, _}) => {
-                  setResult(.
-                    Complete({time: Js.Date.now(), benchmark: currentTarget}),
-                  )
-                },
+                (. B.Event.{currentTarget, _}) =>
+                  if (!currentTarget.B.Benchmark.aborted) {
+                    setResult(.
+                      Complete({
+                        time: Js.Date.now(),
+                        benchmark: currentTarget,
+                      }),
+                    );
+                  },
               (),
             ),
           (),
@@ -204,10 +212,16 @@ module Wrapper = {
     React.useEffect1(
       () => {
         suite
-        ->B.Suite.on(`start, _ =>
-            setRunning(. Started({time: Js.Date.now()}))
+        ->B.Suite.on(`start, (B.Event.{currentTarget, _}) =>
+            if (!currentTarget->B.Suite.aborted) {
+              setRunning(. Started({time: Js.Date.now()}));
+            }
           )
-        ->B.Suite.on(`complete, e => {setRunning(. getStats(e))})
+        ->B.Suite.on(`complete, e =>
+            if (!e.B.Event.currentTarget->B.Suite.aborted) {
+              setRunning(. getStats(e));
+            }
+          )
         ->ignore;
         Some(() => B.Suite.abort(suite));
       },

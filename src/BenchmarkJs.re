@@ -23,6 +23,7 @@ module Times = {
 
 module Benchmark = {
   type t = {
+    aborted: bool,
     name: string,
     hz: float,
     stats: Stats.t,
@@ -72,8 +73,8 @@ module Suite = {
   type t = Js.Dict.t(Benchmark.t);
 
   [@bs.get] external name: t => string = "name";
-
   [@bs.get] external length: t => int = "length";
+  [@bs.get] external aborted: t => bool = "aborted";
 
   [@bs.module "benchmark"] [@bs.new] external make: string => t = "Suite";
 
