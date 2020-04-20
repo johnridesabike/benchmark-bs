@@ -47263,10 +47263,18 @@ var benchmarks$7 = [{
     };
   }
 }, {
-  name: "JS update",
+  name: "JS spread syntax (no polyfill)",
   code: "let tenFieldsJs\': tenFields = [%bs.raw \"{...tenFieldsJs, a: 2}\"];",
   f: function f() {
     return _objectSpread({}, tenFieldsJs, {
+      a: 2
+    });
+  }
+}, {
+  name: "JS Object.assign",
+  code: "let tenFieldsJs\': tenFields = [%raw \"Object.assign({}, tenFieldsJs, {a: 2})\"];",
+  f: function f() {
+    return Object.assign({}, tenFieldsJs, {
       a: 2
     });
   }
@@ -47976,7 +47984,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62992" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50025" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
