@@ -460,11 +460,22 @@ var tenFieldsJs = {
         },
     },
     {
-      name: "JS update",
+      name: "JS spread syntax (no polyfill)",
       code: {j|let tenFieldsJs': tenFields = [%bs.raw "{...tenFieldsJs, a: 2}"];|j},
       f:
         (.) => {
           let tenFieldsJs': tenFields = [%raw "{...tenFieldsJs, a: 2}"];
+          Any(tenFieldsJs');
+        },
+    },
+    {
+      name: "JS Object.assign",
+      code: {j|let tenFieldsJs': tenFields = [%raw "Object.assign({}, tenFieldsJs, {a: 2})"];|j},
+      f:
+        (.) => {
+          let tenFieldsJs': tenFields = [%raw
+            "Object.assign({}, tenFieldsJs, {a: 2})"
+          ];
           Any(tenFieldsJs');
         },
     },
