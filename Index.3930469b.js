@@ -47180,7 +47180,9 @@ var suite$1 = {
   setup: suite_setup$1,
   benchmarks: benchmarks$5
 };
-var arr$1 = Belt_Array.make(100, Js_math.random_int(-1000, 1000));
+var arr$1 = Belt_Array.makeBy(100, function (param) {
+  return Js_math.random_int(-1000, 1000);
+});
 var intCmp = Caml_primitive.caml_int_compare;
 var benchmarks$6 = [{
   name: "Belt.SortArray.Int",
@@ -47213,7 +47215,7 @@ var benchmarks$6 = [{
     return arr$1.slice().sort(Caml_primitive.caml_int_compare);
   }
 }];
-var suite_setup$2 = "let arr = Belt.Array.make(100, Js.Math.random_int(-1000, 1000));\nlet intCmp = (. a: int, b: int) => compare(a, b);";
+var suite_setup$2 = "let arr = Belt.Array.makeBy(100, _ => Js.Math.random_int(-1000, 1000));\nlet intCmp = (. a: int, b: int) => compare(a, b);";
 var suite$2 = {
   name: "Array sorting",
   setup: suite_setup$2,
@@ -47984,7 +47986,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50025" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50267" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
