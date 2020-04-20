@@ -11,23 +11,26 @@ module ArrayAccess = {
   let benchmarks = [|
     {
       name: "Array.get",
-      f: (.) => arr[50]->ignore,
+      f: (.) => arr[50]->Any,
       code: "arr[50];"
     },
     {
       name: "Belt.Array.get",
-      f: (.) => Belt.(arr[50]->ignore),
+      f: (.) => Belt.(arr[50]->Any),
       code: "Belt.(arr[50]);",
     },
     {
       name: "Belt.Array.getExn",
-      f: (.) => arr->Belt.Array.getExn(50)->ignore,
+      f: (.) => arr->Belt.Array.getExn(50)->Any,
       code: "arr->Belt.Array.getExn(50);",
     },
   |];
   let suite = {setup, name, benchmarks};
 };
 ```
+
+All `f` functions have to return an `Any` type. This is just an opaque type
+that allows polymorphic returns.
 
 Be aware that BuckleScript does aggresive optimizations, so check the compiled
 JavaScript to ensure that your benchmark functions are actually doing what you

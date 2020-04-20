@@ -1,7 +1,9 @@
+type any;
+
 type benchmark = {
   name: string,
   code: string,
-  f: (. unit) => unit,
+  f: (. unit) => any,
 };
 
 type t = {
@@ -24,3 +26,9 @@ module Routes: {
   let routes: array(key);
 };
 
+
+/* This is exported to avoid BS from optimizing it away. */
+module ImmutableObjUpdate: {
+  type tenFields;
+  let tenFields: tenFields;
+};
