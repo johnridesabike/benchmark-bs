@@ -325,10 +325,10 @@ module ArrayAccess = {
 module ArraySort = {
   let name = "Array sorting";
 
-  let arr = Belt.Array.make(100, Js.Math.random_int(-1000, 1000));
+  let arr = Belt.Array.makeBy(100, _ => Js.Math.random_int(-1000, 1000));
   let intCmp = (. a: int, b: int) => compare(a, b);
 
-  let setup = {j|let arr = Belt.Array.make(100, Js.Math.random_int(-1000, 1000));
+  let setup = {j|let arr = Belt.Array.makeBy(100, _ => Js.Math.random_int(-1000, 1000));
 let intCmp = (. a: int, b: int) => compare(a, b);|j};
 
   let benchmarks = [|
