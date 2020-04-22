@@ -26,9 +26,3 @@ module Routes: {
   let routes: array(key);
 };
 
-
-/* This is exported to avoid BS from optimizing it away. */
-module ImmutableObjUpdate: {
-  type tenFields;
-  let tenFields: tenFields;
-};

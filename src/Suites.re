@@ -366,34 +366,8 @@ let intCmp = (. a: int, b: int) => compare(a, b);|j};
 
 module ImmutableObjUpdate = {
   let name = "Immutable record/object update";
+  open Suites_Input.ImmutableObjUpdate;
 
-  type tenFields = {
-    a: int,
-    b: string,
-    c: int,
-    d: string,
-    e: int,
-    f: string,
-    g: int,
-    h: string,
-    i: int,
-    j: string,
-  };
-  let tenFields = {
-    a: 1,
-    b: "b",
-    c: 3,
-    d: "d",
-    e: 5,
-    f: "f",
-    g: 7,
-    h: "h",
-    i: 9,
-    j: "j",
-  };
-  /* You would usually do the update inline instead of with a function, but this
-     stops BuckleScript from over-optimizing the compiled JS. */
-  let setA = (x, a) => {...x, a};
   %raw
   "
   var tenFieldsJs = {
@@ -432,9 +406,6 @@ let tenFields = {
   i: 9,
   j: "j",
 };
-/* You would usually do the update inline instead of with a function, but this
-    stops BuckleScript from over-optimizing the compiled JS. */
-let setA = (x, a) => {...x, a};
 %raw
 "
 var tenFieldsJs = {
@@ -452,10 +423,10 @@ var tenFieldsJs = {
   let benchmarks = [|
     {
       name: "Record update",
-      code: "let tenFields' = setA(tenFields, 2);",
+      code: "let tenFields' = {...tenFields, a: 2};",
       f:
         (.) => {
-          let tenFields' = setA(tenFields, 2);
+          let tenFields' = {...tenFields, a: 2};
           Any(tenFields');
         },
     },
@@ -478,6 +449,76 @@ var tenFieldsJs = {
           ];
           Any(tenFieldsJs');
         },
+    },
+  |];
+
+  let suite = {name, setup, benchmarks};
+};
+
+module DestructureTuple = {
+  let name = "Destructure tuples";
+
+  open Suites_Input.DestructureTuple;
+
+  let setup = {j|let two = (1, 2);
+let eight = (1, 2, 3, 4, 5, 6, 7, 8);
+%raw
+"
+var twoJs = [1, 2];
+var eightJs = [1, 2, 3, 4, 5, 6, 7, 8]";
+|j};
+  %raw
+  "
+var twoJs = [1, 2];
+var eightJs = [1, 2, 3, 4, 5, 6, 7, 8]";
+
+  let twoJsFn: (. unit) => any = [%raw
+"function () {
+  var [a, b] = twoJs;
+  return a + b;
+}"
+  ];
+
+  let eightJsFn: (. unit) => any = [%raw
+"function () {
+  var [a, b, c, d, e, f, g, h] = eightJs;
+  return a + b + c + d + e + f + g + h;
+}"
+  ];
+
+  let benchmarks = [|
+    {
+      name: "Reason: destructure two-tuple",
+      code: {j|let (a, b) = two;
+a + b;|j},
+      f:
+        (.) => {
+          let (a, b) = two;
+          Any(a + b);
+        },
+    },
+    {
+      name: "Reason: destructure eight-tuple",
+      code: {j|let (a, b, c, d, e, f, g, h) = eight;
+a + b + c + d + e + f + g + h;
+|j},
+      f:
+        (.) => {
+          let (a, b, c, d, e, f, g, h) = eight;
+          Any(a + b + c + d + e + f + g + h);
+        },
+    },
+    {
+      name: "JavaScript: destructure two-tuple (no polyfill)",
+      code: {j|var [a, b] = twoJs;
+return a + b;|j},
+      f: twoJsFn,
+    },
+    {
+      name: "JavaScript: destructure eight-tuple (no polyfill)",
+      code: {j|var [a, b, c, d, e, f, g, h] = eightJs;
+return a + b + c + d + e + f + g + h;|j},
+      f: eightJsFn,
     },
   |];
 
@@ -510,7 +551,8 @@ module Routes = {
     | MapsSet
     | ArrayAccess
     | ArraySort
-    | ImmutableObjUpdate;
+    | ImmutableObjUpdate
+    | DestructureTuple;
 
   /* Make sure the URLs are the same in both functions! */
 
@@ -526,6 +568,10 @@ module Routes = {
     | ImmutableObjUpdate => {
         suite: ImmutableObjUpdate.suite,
         url: "immutable-obj-update",
+      }
+    | DestructureTuple => {
+        suite: DestructureTuple.suite,
+        url: "destructure-tuple",
       };
 
   let fromUrl =
@@ -538,6 +584,7 @@ module Routes = {
     | "array-access" => Some(ArrayAccess)
     | "array-sort" => Some(ArraySort)
     | "immutable-obj-update" => Some(ImmutableObjUpdate)
+    | "destructure-tuple" => Some(DestructureTuple)
     | _ => None;
 
   /* The main menu uses this array to list pages. */
@@ -550,5 +597,6 @@ module Routes = {
     MapsSet,
     ArrayAccess,
     ArraySort,
+    DestructureTuple,
   |];
 };
