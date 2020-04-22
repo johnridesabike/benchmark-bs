@@ -431,7 +431,7 @@ var tenFieldsJs = {
         },
     },
     {
-      name: "JS spread syntax (no polyfill)",
+      name: "JS spread syntax",
       code: {j|let tenFieldsJs': tenFields = [%bs.raw "{...tenFieldsJs, a: 2}"];|j},
       f:
         (.) => {
@@ -460,8 +460,9 @@ module DestructureTuple = {
 
   open Suites_Input.DestructureTuple;
 
-  let setup = {j|let two = (1, 2);
-let eight = (1, 2, 3, 4, 5, 6, 7, 8);
+  let setup = {j|
+let two = (1., 2.);
+let eight = (1., 2., 3., 4., 5., 6., 7., 8.);
 %raw
 "
 var twoJs = [1, 2];
@@ -473,14 +474,14 @@ var twoJs = [1, 2];
 var eightJs = [1, 2, 3, 4, 5, 6, 7, 8]";
 
   let twoJsFn: (. unit) => any = [%raw
-"function () {
+    "function () {
   var [a, b] = twoJs;
   return a + b;
 }"
   ];
 
   let eightJsFn: (. unit) => any = [%raw
-"function () {
+    "function () {
   var [a, b, c, d, e, f, g, h] = eightJs;
   return a + b + c + d + e + f + g + h;
 }"
@@ -490,34 +491,120 @@ var eightJs = [1, 2, 3, 4, 5, 6, 7, 8]";
     {
       name: "Reason: destructure two-tuple",
       code: {j|let (a, b) = two;
-a + b;|j},
+a +. b;|j},
       f:
         (.) => {
           let (a, b) = two;
-          Any(a + b);
+          Any(a +. b);
         },
     },
     {
       name: "Reason: destructure eight-tuple",
       code: {j|let (a, b, c, d, e, f, g, h) = eight;
-a + b + c + d + e + f + g + h;
+a +. b +. c +. d +. e +. f +. g +. h;
 |j},
       f:
         (.) => {
           let (a, b, c, d, e, f, g, h) = eight;
-          Any(a + b + c + d + e + f + g + h);
+          Any(a +. b +. c +. d +. e +. f +. g +. h);
         },
     },
     {
-      name: "JavaScript: destructure two-tuple (no polyfill)",
+      name: "JavaScript: destructure two-tuple",
       code: {j|var [a, b] = twoJs;
-return a + b;|j},
+a + b;|j},
       f: twoJsFn,
     },
     {
-      name: "JavaScript: destructure eight-tuple (no polyfill)",
+      name: "JavaScript: destructure eight-tuple",
       code: {j|var [a, b, c, d, e, f, g, h] = eightJs;
-return a + b + c + d + e + f + g + h;|j},
+a + b + c + d + e + f + g + h;|j},
+      f: eightJsFn,
+    },
+  |];
+
+  let suite = {name, setup, benchmarks};
+};
+
+module DestructureRecord = {
+  let name = "Destructure records";
+
+  open! Suites_Input.DestructureRecord;
+
+  %raw
+  "
+var fourFieldsJs = {a: 1, b: 2, c: 3, d: 4};
+var eightFieldsJs = {e: 1, f: 2, g: 3, h: 4, i: 5, j: 6, k: 7, l: 8};
+  ";
+  let setup = {j|type fourFields = {
+  a: float,
+  b: float,
+  c: float,
+  d: float,
+};
+let fourFields = {a: 1., b: 2., c: 3., d: 4.};
+type eightFields = {
+  e: float,
+  f: float,
+  g: float,
+  h: float,
+  i: float,
+  j: float,
+  k: float,
+  l: float,
+};
+let eightFields = {e: 1., f: 2., g: 3., h: 4., i: 5., j: 6., k: 7., l: 8.};
+%raw
+"
+var fourFieldsJs = {a: 1, b: 2, c: 3, d: 4};
+var eightFieldsJs = {e: 1, f: 2, g: 3, h: 4, i: 5, j: 6, k: 7, l: 8};
+";|j};
+
+  let fourJsFn: (. unit) => any = [%raw
+    "function () {
+  var {a, b, c, d} = fourFieldsJs;
+  return a + b + c + d;
+}"
+  ];
+
+  let eightJsFn: (. unit) => any = [%raw
+    "function () {
+  var {e, f, g, h, i, j, k, l} = eightFieldsJs;
+  return e + f + g + h + i + j + k + l;
+}"
+  ];
+
+  let benchmarks = [|
+    {
+      name: "Reason: four fields",
+      code: {j|let {a, b, c, d} = fourFields;
+a +. b +. c +. d;|j},
+      f:
+        (.) => {
+          let {a, b, c, d} = fourFields;
+          Any(a +. b +. c +. d);
+        },
+    },
+    {
+      name: "Reason: eight fields",
+      code: {j|let {e, f, g, h, i, j, k, l} = eightFields;
+e +. f +. g +. h +. i +. j +. k +. l;|j},
+      f:
+        (.) => {
+          let {e, f, g, h, i, j, k, l} = eightFields;
+          Any(e +. f +. g +. h +. i +. j +. k +. l);
+        },
+    },
+    {
+      name: "JavaScript: four fields",
+      code: {j|var {a, b, c, d} = fourFieldsJs;
+a + b + c + d|j},
+      f: fourJsFn,
+    },
+    {
+      name: "JavaScript: eight fields",
+      code: {j|var {e, f, g, h, i, j, k, l} = eightFieldsJs;
+e + f + g + h + i + j + k + l;|j},
       f: eightJsFn,
     },
   |];
@@ -552,7 +639,8 @@ module Routes = {
     | ArrayAccess
     | ArraySort
     | ImmutableObjUpdate
-    | DestructureTuple;
+    | DestructureTuple
+    | DestructureRecord;
 
   /* Make sure the URLs are the same in both functions! */
 
@@ -572,6 +660,10 @@ module Routes = {
     | DestructureTuple => {
         suite: DestructureTuple.suite,
         url: "destructure-tuple",
+      }
+    | DestructureRecord => {
+        suite: DestructureRecord.suite,
+        url: "destructure-record",
       };
 
   let fromUrl =
@@ -585,11 +677,14 @@ module Routes = {
     | "array-sort" => Some(ArraySort)
     | "immutable-obj-update" => Some(ImmutableObjUpdate)
     | "destructure-tuple" => Some(DestructureTuple)
+    | "destructure-record" => Some(DestructureRecord)
     | _ => None;
 
   /* The main menu uses this array to list pages. */
   let routes = [|
     ImmutableObjUpdate,
+    DestructureTuple,
+    DestructureRecord,
     Strings,
     ListArrayMap,
     ListArrayHead,
@@ -597,6 +692,5 @@ module Routes = {
     MapsSet,
     ArrayAccess,
     ArraySort,
-    DestructureTuple,
   |];
 };
