@@ -25,6 +25,7 @@
     "stylelint-config-standard": "^20.0.0"
   },
   "dependencies": {
+    "bs-webapi": "^0.15.9",
     "normalize.css": "^8.0.1",
     "reason-react": "^0.7.1"
   }

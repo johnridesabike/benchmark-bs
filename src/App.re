@@ -6,6 +6,22 @@ module Prism = {
   external highlightAll: unit => unit = "highlightAll";
 };
 
+module DocTitle = {
+  let prefix = "Benchmark.bs.js";
+
+  let set = title =>
+    Webapi.Dom.(
+      document
+      ->Document.unsafeAsHtmlDocument
+      ->HtmlDocument.setTitle(prefix ++ " - " ++ title)
+    );
+
+  let reset = () =>
+    Webapi.Dom.(
+      document->Document.unsafeAsHtmlDocument->HtmlDocument.setTitle(prefix)
+    );
+};
+
 type running =
   | NotStarted
   | Started({time: float})
@@ -227,6 +243,10 @@ module Wrapper = {
       },
       [|suite|],
     );
+    React.useEffect0(() => {
+      DocTitle.set(suite->B.Suite.name);
+      Some(DocTitle.reset);
+    });
     <section>
       <header> <h1> {suite->B.Suite.name->React.string} </h1> </header>
       <div className="setup">
@@ -290,6 +310,10 @@ module Wrapper = {
 [@react.component]
 let make = () => {
   let url = Router.useUrl();
+  React.useEffect0(() => {
+    DocTitle.reset();
+    None;
+  });
   <div className="smallscreen-padding">
     <main className="main ">
       <header>

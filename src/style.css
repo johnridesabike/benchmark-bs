@@ -97,14 +97,14 @@
 body {
     font-family: var(--font__main);
     font-size: var(--font__medium);
-    font-weight: 300;
+    font-weight: 400;
     background-color: var(--grey-10);
     color: var(--grey-90);
 }
 
 h1 {
     font-size: var(--font__xlarge);
-    font-weight: 200;
+    font-weight: 300;
     text-align: center;
     border-bottom-style: solid;
     border-width: 1px;
@@ -115,7 +115,7 @@ h1 {
 
 h2 {
     font-size: var(--font__large);
-    font-weight: 200;
+    font-weight: 300;
 }
 
 h2.index-header {
@@ -126,6 +126,10 @@ h2.index-header {
 h3 {
     font-size: var(--font__medium);
     font-weight: 500;
+}
+
+dl {
+    font-weight: 300;
 }
 
 dt {
@@ -213,6 +217,10 @@ a:focus {
 .footer {
     width: 100%;
     overflow: hidden;
+}
+
+.footer {
+    font-weight: 300;
 }
 
 .code {
