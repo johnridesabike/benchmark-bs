@@ -52,6 +52,11 @@ loop("", strings);|j},
       f: (.) => Any(stringsArr |> Js.Array.joinWith("")),
       code: {j|stringsArr |> Js.Array.joinWith("");|j},
     },
+    {
+      name: "Js.String.concatMany",
+      f: (.) => Any(stringsArr->Js.String.concatMany("")),
+      code: {j|stringsArr->Js.String.concatMany("");|j},
+    }
   |];
 
   let name = "Concatenate 100 strings";
